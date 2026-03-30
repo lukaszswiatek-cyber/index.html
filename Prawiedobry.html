@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beliani Returns & Claims Portal</title>
+    <style>
+        :root {
+            --primary: #000000;
+            --accent: #2563eb;
+            --warning-bg: #fff7ed;
+            --warning-border: #ea580c;
+            --error-bg: #fef2f2;
+            --error-text: #991b1b;
+        }
+
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; color: #1f2937; line-height: 1.6; padding: 20px; }
+        
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+        /* NOWY STYL NAgłówka Z LOGO */
+        .header-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header-logo img {
+            max-width: 200px; /* Dostosuj rozmiar logo w razie potrzeby */
+            height: auto;
+        }
+        /* -------------------------- */
+
+        .progress { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+        .step-label { font-weight: bold; color: #94a3b8; flex: 1; text-align: center; font-size: 0.85rem; text-transform: uppercase; }
+        .step-label.active { color: var(--accent); }
+
+        .content-step { display: none; }
+        .content-step.active { display: block; }
+
+        h2 { margin-top: 0; font-size: 1.5rem; color: var(--primary); margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+
+        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; transition: border 0.2s; }
+        select:focus { border-color: var(--accent); outline: none; }
+
+        .helper-link { font-size: 0.85rem; color: var(--accent); text-decoration: underline; margin-top: 4px; display: inline-block; }
+
+        /* Logic Panels */
+        .info-panel { background: var(--warning-bg); border-left: 4px solid var(--warning-border); padding: 20px; border-radius: 4px; margin: 20px 0; display: none; }
+        .error-panel { background: var(--error-bg); border: 1px solid #fecaca; color: var(--error-text); padding: 20px; border-radius: 8px; margin: 20px 0; display: none; }
+        
+        .checkbox-container { background: #ffffff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        .chk-item { display: flex; gap: 12px; margin-bottom: 12px; font-size: 0.9rem; cursor: pointer; align-items: flex-start; }
+        .chk-item input { width: auto; margin-top: 4px; }
+
+        .btn-row { display: flex; gap: 15px; margin-top: 30px; }
+        button { padding: 14px 28px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-next { background: var(--primary); color: white; flex: 2; }
+        .btn-next:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn-back { background: #f1f5f9; color: #475569; flex: 1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-logo">
+        <img src="image_0.png" alt="Beliani Logo">
+    </div>
+    <div class="progress">
+        <div class="step-label active" id="l1">1. Identification</div>
+        <div class="step-label" id="l2">2. Eligibility Check</div>
+        <div class="step-label" id="l3">3. Final Details</div>
+    </div>
+
+    <div id="step1" class="content-step active">
+        <h2>Order & Action</h2>
+        <div class="form-group">
+            <label>Order Number *</label>
+            <input type="text" id="orderNo" placeholder="e.g. #1234567">
+        </div>
+        <div class="form-group">
+            <label>Action Required *</label>
+            <select id="actionType" onchange="runLogic()">
+                <option value="">-- Select --</option>
+                <option value="return">Right to Return (Withdrawal)</option>
+                <option value="damage">Claim (Damaged/Defective)</option>
+            </select>
+        </div>
+        <div class="btn-row">
+            <button class="btn-next" onclick="nav(2)">Continue</button>
+        </div>
+    </div>
+
+    <div id="step2" class="content-step">
+        <h2>Eligibility Assessment</h2>
+        
+        <div class="form-group">
+            <label>Customer Type *</label>
+            <select id="custType" onchange="runLogic()">
+                <option value="b2c">B2C (Private Customer)</option>
+                <option value="b2b">B2B (Business Customer)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Pick up location (Country/Region) *</label>
+            <select id="location" onchange="runLogic()">
+                <option value="mainland">Mainland (Standard Area)</option>
+                <option value="remote">Highlands, Islands, NI, Norway, Romania</option>
+            </select>
+            <a href="https://www.beliani.co.uk/content/delivery/" target="_blank" class="helper-link">
+                Check if your ZIP code requires additional fees here →
+            </a>
+        </div>
+
+        <div class="form-group">
+            <label>Timeframe *</label>
+            <select id="time" onchange="runLogic()">
+                <option value="in14">0 - 14 Days (Standard Window)</option>
+                <option value="post14">15 - 365 Days (Extended Period)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Product Condition *</label>
+            <select id="condition" onchange="runLogic()">
+                <option value="new">Brand New / Disassembled</option>
+                <option value="assembled">Already Assembled / Used</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Original Packaging *</label>
+            <select id="pkg" onchange="runLogic()">
+                <option value="yes">Yes, I have original Beliani boxes</option>
+                <option value="no">No, packaging is missing</option>
+            </select>
+        </div>
+
+        <div id="errorPanel" class="error-panel">
+            <h4 style="margin-top:0">🚫 Return Not Possible</h4>
+            <p id="errorText"></p>
+            <p style="font-size: 0.85rem;">Refer to our <a href="https://www.beliani.co.uk/content/terms-and-conditions/" target="_blank">Full T&Cs</a> for more details.</p>
+        </div>
+
+        <div id="infoPanel" class="info-panel">
+            <h4 id="popTitle">⚠️ Important Conditions</h4>
+            <div id="popContent"></div>
+            
+            <div class="checkbox-container" id="checkList"></div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-back" onclick="nav(1)">Back</button>
+            <button class="btn-next" id="btnNext" disabled onclick="nav(3)">Accept & Continue</button>
+        </div>
+    </div>
+
+    <div id="step3" class="content-step">
+        <h2>Evidence & Submission</h2>
+        <div class="form-group">
+            <label>Explain the situation *</label>
+            <textarea id="details" rows="5" placeholder="Please provide additional information..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Upload Photos *</label>
+            <input type="file" id="files" multiple style="border:none; padding:0;">
+            <p style="font-size: 0.8rem; color: #64748b;">Include photos of the product, shipping label, and packaging.</p>
+        </div>
+        <div class="btn-row">
+            <button class="btn-back" onclick="nav(2)">Back</button>
+            <button class="btn-next" onclick="finish()">Submit Final Claim</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function nav(s) {
+        if(s === 2 && !document.getElementById('orderNo').value) return alert("Enter Order Number");
+        document.querySelectorAll('.content-step').forEach(d => d.classList.remove('active'));
+        document.getElementById('step'+s).classList.add('active');
+        document.querySelectorAll('.step-label').forEach((l, i) => l.classList.toggle('active', i < s));
+        if(s === 2) runLogic();
+    }
+
+    function runLogic() {
+        const b2b = document.getElementById('custType').value === 'b2b';
+        const loc = document.getElementById('location').value === 'remote';
+        const late = document.getElementById('time').value === 'post14';
+        const assembled = document.getElementById('condition').value === 'assembled';
+        const noPkg = document.getElementById('pkg').value === 'no';
+
+        const infoPanel = document.getElementById('infoPanel');
+        const errorPanel = document.getElementById('errorPanel');
+        const nextBtn = document.getElementById('btnNext');
+
+        let info = [];
+        let checks = [];
+        let isBlocked = false;
+
+        // RULE: Assembled after 14 days is NOT eligible
+        if (late && assembled) {
+            isBlocked = true;
+            document.getElementById('errorText').innerHTML = "<b>Ineligibility Warning:</b> According to our Terms and Conditions, returns requested after the initial 14-day window are only accepted for products that are <b>brand new, unused, and unassembled</b>. Since your product is already assembled, we cannot accept a return.";
+        }
+
+        // RULE: After 14 days requires Original Packaging
+        if (late && noPkg && !isBlocked) {
+            isBlocked = true;
+            document.getElementById('errorText').innerHTML = "<b>Ineligibility Warning:</b> Extended returns (15-365 days) strictly require the <b>original packaging</b>. Without original boxes, we cannot process this request per our T&C.";
+        }
+
+        if (isBlocked) {
+            infoPanel.style.display = 'none';
+            errorPanel.style.display = 'block';
+            nextBtn.disabled = true;
+            return;
+        }
+
+        errorPanel.style.display = 'none';
+
+        // B2B Fees
+        if (b2b) {
+            info.push("<b>B2B Return:</b> Business customers must pay return shipping costs, which will be deducted from the refund.");
+            checks.push("I understand and agree that return costs will be deducted from my refund (B2B policy).");
+        }
+
+        // Location Fees
+        if (loc) {
+            info.push("<b>Location Surcharge:</b> Your area (Remote/International) is subject to paid return fees as per our <a href='https://www.beliani.co.uk/content/delivery/' target='_blank'>Delivery Policy</a>.");
+            checks.push("I acknowledge that additional transportation fees for my region will be deducted.");
+        }
+
+        // 14-Day Window Logic
+        if (!late) {
+            if (!noPkg && !b2b && !loc) {
+                info.push("<b>Free Return Eligible:</b> You qualify for a free return. Item must be disassembled and ready at the curb.");
+                checks.push("I confirm the item is disassembled and in original boxes.");
+            } else if (noPkg) {
+                info.push("<b>No Packaging:</b> You must provide alternative packaging. Return fees apply.");
+                checks.push("I agree to provide alternative packaging and accept shipping fee deductions.");
+            }
+        } else {
+            // Late but New/Pkg (Voucher)
+            info.push("<b>Extended Return (Voucher):</b> Refund will be issued as a <b>voucher</b>. Return shipping fees will be deducted.");
+            checks.push("I understand the refund will be a voucher minus shipping costs.");
+        }
+
+        // Logic display
+        if (info.length > 0) {
+            infoPanel.style.display = 'block';
+            document.getElementById('popContent').innerHTML = "<ul>" + info.map(i => `<li>${i}</li>`).join('') + "</ul>";
+            document.getElementById('checkList').innerHTML = checks.map(c => `
+                <label class="chk-item">
+                    <input type="checkbox" class="logic-chk" onchange="validate()">
+                    <span>${c} *</span>
+                </label>
+            `).join('');
+        } else {
+            infoPanel.style.display = 'none';
+        }
+        validate();
+    }
+
+    function validate() {
+        const chks = document.querySelectorAll('.logic-chk');
+        const allChecked = Array.from(chks).every(c => c.checked);
+        const selectsFilled = ['custType', 'location', 'time', 'condition', 'pkg'].every(id => document.getElementById(id).value !== "");
+        document.getElementById('btnNext').disabled = !selectsFilled || (chks.length > 0 && !allChecked);
+    }
+
+    function finish() {
+        if(!document.getElementById('details').value) return alert("Please provide details.");
+        alert("Claim submitted successfully for review.");
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
